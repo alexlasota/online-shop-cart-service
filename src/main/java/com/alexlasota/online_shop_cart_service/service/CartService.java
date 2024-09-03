@@ -22,7 +22,6 @@ public class CartService {
     private final CartMapper cartMapper;
     private final CartItemRepository cartItemRepository;
 
-
     @Transactional
     public CartDTO createCart() {
         Cart cart = new Cart();
@@ -44,11 +43,15 @@ public class CartService {
         CartItem item = cartMapper.toEntity(itemDTO);
         item.setCart(cart);
 
+        if (itemDTO.getPrice() == null) {
+            throw new IllegalArgumentException("Price must be provided for the cart item");
+        }
+        item.setPrice(itemDTO.getPrice());
+
         cart.getItems().add(item);
         recalculateTotalPrice(cart);
 
         cartItemRepository.save(item);
-
         cart = cartRepository.save(cart);
 
         return cartMapper.toDTO(cart);
